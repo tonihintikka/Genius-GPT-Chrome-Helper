@@ -47,29 +47,46 @@ function createDialog(suggestion, textField) {
   
 // Check if the target element is a text field or a textarea
 function isTextField(element) {
-    return element.tagName === "INPUT" && element.type === "text" || element.tagName === "TEXTAREA";
+    return (
+      (element.tagName === "INPUT" && element.type === "text") ||
+      element.tagName === "TEXTAREA" ||
+      element.isContentEditable
+    );
   }
+  
   
   // Get text from a text field or a textarea
   function getText(element) {
-    if (element.tagName === "INPUT") {
+    if (element.tagName === "INPUT" || element.tagName === "TEXTAREA") {
       return element.value;
-    } else if (element.tagName === "TEXTAREA") {
-      return element.value;
+    } else if (element.isContentEditable) {
+      return element.textContent;
     }
   }
   
+  
   // Set text for a text field or a textarea
   function setText(element, text) {
-    if (element.tagName === "INPUT") {
+    if (element.tagName === "INPUT" || element.tagName === "TEXTAREA") {
       element.value = text;
-    } else if (element.tagName === "TEXTAREA") {
-      element.value = text;
+    } else if (element.isContentEditable) {
+      element.textContent = text;
     }
   }
-  function setCursorPosition(textField, position) {
-    textField.selectionStart = textField.selectionEnd = position;
+  
+  function setCursorPosition(element, position) {
+    if (element.tagName === "INPUT" || element.tagName === "TEXTAREA") {
+      element.selectionStart = element.selectionEnd = position;
+    } else if (element.isContentEditable) {
+      const range = document.createRange();
+      const sel = window.getSelection();
+      range.setStart(element.firstChild, position);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
   }
+  
 
   function setLoadingIndicator(textField, visible) {
     const existingIndicator = document.getElementById("chatgpt-loading-indicator");
