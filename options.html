@@ -3,18 +3,21 @@
   <head>
     <title>ChatGPT Helper Options</title>
     <style>
-      label {
-        display: block;
-        margin: 10px 0;
-      }
-    </style>
+        body {
+          width: 300px;
+          margin: 0 auto;
+          font-family: Arial, sans-serif;
+        }
+        label {
+          display: block;
+          margin-top: 10px;
+        }
+      </style>
   </head>
   <body>
-    <label>
-      API Key:
-      <input type="text" id="api_key" />
-    </label>
-    <button id="save">Save</button>
+    <h1>Options</h1>
+    <label for="apiKey">API Key:</label>
+    <input type="text" id="apiKey" />
+    <button id="saveButton">Save</button>
     <script src="options.js"></script>
-  </body>
 </html>

@@ -1,19 +1,11 @@
-const API_URL = "https://api.openai.com/v1/engines/davinci-codex/completions";
+const API_URL = "https://api.openai.com/v1/completions";
 let apiKey = "";
 
 chrome.storage.sync.get(["apiKey"], (result) => {
   apiKey = result.apiKey || "";
 });
 
-function handleResponse(response) {
-  return response.json().then((data) => {
-    if (response.ok) {
-      return data;
-    } else {
-      return Promise.reject({ status: response.status, data });
-    }
-  });
-}
+
 function createDialog(suggestion, textField) {
     const dialog = document.createElement("div");
     dialog.id = "chatgpt-dialog";
@@ -53,36 +45,75 @@ function createDialog(suggestion, textField) {
     return dialog;
   }
   
+// Check if the target element is a text field or a textarea
+function isTextField(element) {
+    return element.tagName === "INPUT" && element.type === "text" || element.tagName === "TEXTAREA";
+  }
+  
+  // Get text from a text field or a textarea
+  function getText(element) {
+    if (element.tagName === "INPUT") {
+      return element.value;
+    } else if (element.tagName === "TEXTAREA") {
+      return element.value;
+    }
+  }
+  
+  // Set text for a text field or a textarea
+  function setText(element, text) {
+    if (element.tagName === "INPUT") {
+      element.value = text;
+    } else if (element.tagName === "TEXTAREA") {
+      element.value = text;
+    }
+  }
+  function setCursorPosition(textField, position) {
+    textField.selectionStart = textField.selectionEnd = position;
+  }
 
-function fetchSuggestions(prompt) {
+
+
+  async function fetchSuggestions(prompt) {
     if (!apiKey) {
       return Promise.reject(new Error("API key not set"));
     }
   
-    return fetch(API_URL, {
+    console.log("Fetching suggestions for prompt:", prompt);
+  
+    const response = await fetch("https://api.openai.com/v1/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
+        model: "text-davinci-003",
         prompt: prompt,
-        max_tokens: 50,
+        max_tokens: 1000,
         n: 1,
         stop: null,
         temperature: 0.5,
       }),
-    }).then(handleResponse);
+    });
+  
+    if (response.ok) {
+        console.log(response);
+      return await response.json();
+    } else {
+      const errorData = await response.json();
+      throw { status: response.status, data: errorData };
+    }
   }
 
-function insertSuggestion(suggestion, textField) {
-  const cursorPosition = textField.selectionStart;
-  const textBeforeCursor = textField.value.substring(0, cursorPosition);
-  const textAfterCursor = textField.value.substring(cursorPosition);
-
-  textField.value = textBeforeCursor + suggestion + textAfterCursor;
-  textField.selectionStart = textField.selectionEnd = cursorPosition + suggestion.length;
-}
+  function insertSuggestion(suggestion, textField) {
+    const cursorPosition = textField.selectionStart;
+    const textBeforeCursor = textField.value.substring(0, cursorPosition);
+    const textAfterCursor = textField.value.substring(cursorPosition);
+  
+    textField.value = textBeforeCursor + suggestion + textAfterCursor;
+    textField.selectionStart = textField.selectionEnd = cursorPosition + suggestion.length;
+  }
+  
 
 document.addEventListener("input", async (event) => {
     const textField = event.target;
