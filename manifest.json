@@ -1,17 +1,17 @@
-{
-    "manifest_version": 2,
-    "name": "ChatGPT Helper",
+  {
+    "manifest_version": 3,
+    "name": "Genius GPT Chrome Helper",
     "version": "1.0",
-    "description": "Get AI suggestions when typing in text fields",
-    "permissions": [
-      "activeTab",
-      "storage",
-      "https://*.openai.com/"
-    ],
-    "options_page": "options.html",
+    "description": "Get AI-powered text suggestions in any text field.",
+    "permissions": ["activeTab", "scripting"],
+    "icons": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    },
     "content_scripts": [
       {
-        "matches": ["http://*/*", "https://*/*"],
+        "matches": ["<all_urls>"],
         "js": ["content.js"]
       }
     ]
