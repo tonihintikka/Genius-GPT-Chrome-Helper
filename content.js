@@ -71,7 +71,50 @@ function isTextField(element) {
     textField.selectionStart = textField.selectionEnd = position;
   }
 
-
+  function setLoadingIndicator(textField, visible) {
+    const existingIndicator = document.getElementById("chatgpt-loading-indicator");
+  
+    if (visible) {
+      if (!existingIndicator) {
+        const indicator = document.createElement("img");
+        indicator.id = "chatgpt-loading-indicator";
+        indicator.src = "icon48.png";
+        indicator.style.position = "absolute";
+        indicator.style.zIndex = "10001";
+        indicator.style.width = "30px";
+        indicator.style.height = "30px";
+  
+        // Add animation style
+        indicator.style.animation = "chatgpt-spin 1s linear infinite";
+  
+        const rect = textField.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+  
+        indicator.style.top = rect.top + scrollTop + "px";
+        indicator.style.left = rect.right + scrollLeft - indicator.clientWidth + "px";
+  
+        document.body.appendChild(indicator);
+  
+        // Add keyframes for the spin animation
+        const style = document.createElement("style");
+        style.innerHTML = `
+          @keyframes chatgpt-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    } else {
+      if (existingIndicator) {
+        existingIndicator.remove();
+      }
+    }
+  }
+  
+  
+  
 
   async function fetchSuggestions(prompt) {
     if (!apiKey) {
@@ -115,7 +158,7 @@ function isTextField(element) {
   }
   
 
-document.addEventListener("input", async (event) => {
+  document.addEventListener("input", async (event) => {
     const textField = event.target;
     if (isTextField(textField)) {
       const currentValue = getText(textField);
@@ -123,6 +166,7 @@ document.addEventListener("input", async (event) => {
   
       if (hasAiTrigger) {
         const prompt = currentValue.match(/^\/ai\s(.*\S)\s\/$/)[1]; // Extract prompt text
+        setLoadingIndicator(textField, true); // Show the loading indicator
         try {
           const response = await fetchSuggestions(prompt);
           const suggestion = response.choices[0].text.trim();
@@ -133,9 +177,13 @@ document.addEventListener("input", async (event) => {
           }
         } catch (error) {
           console.error("Error fetching suggestions:", error);
+        } finally {
+          setLoadingIndicator(textField, false); // Hide the loading indicator
         }
       }
     }
   });
+  
+  
   
   
