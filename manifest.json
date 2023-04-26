@@ -3,7 +3,8 @@
     "name": "Genius GPT Chrome Helper",
     "version": "1.0",
     "description": "Get AI-powered text suggestions in any text field.",
-    "permissions": ["activeTab", "scripting"],
+    "permissions": ["activeTab", "scripting", "storage"],
+    "options_page": "options.html",
     "icons": {
       "16": "icon16.png",
       "48": "icon48.png",
